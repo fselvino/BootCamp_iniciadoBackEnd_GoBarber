@@ -1,0 +1,8 @@
+{
+  "name": "BootCamp_iniciadoBackEnd_GoBarber",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:fselvino/BootCamp_iniciadoBackEnd_GoBarber.git",
+  "author": "fernandoselvino@gmail.com <fernandoselvino@gmail.com>",
+  "license": "MIT"
+}
