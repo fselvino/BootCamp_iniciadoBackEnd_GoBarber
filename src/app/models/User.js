@@ -24,6 +24,12 @@ class User extends Model {
     return this;
   }
 
+  // chamar esse metodo la no arquivo database/index
+  static associate(models) {
+    // relacionamento pertence a - tabale file conula id
+    this.belongsTo(models.File, { foreignKey: 'avatar_id' });
+  }
+
   checkPassword(password) {
     return bcrypt.compare(password, this.password_hash);
   }
