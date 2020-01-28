@@ -2,6 +2,7 @@ import * as yup from 'yup';
 import { startOfHour, parseISO, isBefore } from 'date-fns';
 import Appointment from '../models/Appointment';
 import User from '../models/User';
+import File from '../models/File';
 
 class AppointmentController {
   async store(req, res) {
@@ -70,6 +71,46 @@ class AppointmentController {
       date: hourStart,
     });
     return res.json(appointment);
+  }
+
+  async index(req, res) {
+    /**
+     * realiza um consulta dos agendamentos realizados pelo usuario logado
+     * e que os seviços não foram cancelados
+     * ordenando por data
+     * retornando somento os atributos id e date
+     */
+    const appointments = await Appointment.findAll({
+      where: { user_id: req.userId, canceled_at: null },
+      order: ['date'],
+      attributes: ['id', 'date'],
+
+      /**
+       * realiza a inclusão do model User apelidado por provider
+       * relacionamento com model User
+       * retorna os atributos do provider sendo id e name
+       */
+      include: [
+        {
+          model: User,
+          as: 'provider',
+          attributes: ['id', 'name'],
+          /**
+           * realiza a inclusão do model File apelidado por avatar
+           * retorna os atributos do avatar do provider sendo path e url
+           * obs o atributo path é obrigatorio para formaçao correta da url
+           */
+          include: [
+            {
+              model: File,
+              as: 'avatar',
+              attributes: ['path', 'url'],
+            },
+          ],
+        },
+      ],
+    });
+    return res.json(appointments);
   }
 }
 export default new AppointmentController();
