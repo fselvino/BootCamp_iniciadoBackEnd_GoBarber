@@ -5,7 +5,7 @@ class ProviderController {
   async index(req, res) {
     const providers = await User.findAll({
       // retorna somente os usuarios provider
-      where: { provider: true },
+      where: { provider: false },
       // retorna somente os atributos relacionados
       attributes: ['id', 'name', 'email', 'avatar_id'],
       // inclue atributos do model File referenciando pelo apelido avatar
