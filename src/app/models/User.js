@@ -27,7 +27,8 @@ class User extends Model {
   // chamar esse metodo la no arquivo database/index
   static associate(models) {
     // relacionamento pertence a - tabale file conula id
-    this.belongsTo(models.File, { foreignKey: 'avatar_id' });
+    // foi atribuido um apelido ao mode File de avatar
+    this.belongsTo(models.File, { foreignKey: 'avatar_id', as: 'avatar' });
   }
 
   checkPassword(password) {

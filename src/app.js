@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import routes from './routes';
 
 import './database';
@@ -13,6 +14,12 @@ class App {
 
   middlwares() {
     this.server.use(express.json());
+
+    // ira servir os arquivos staticos que podem ser acessados diretamente pelo navegador
+    this.server.use(
+      '/files',
+      express.static(path.resolve(__dirname, '../', 'tmp', 'uploads'))
+    );
   }
 
   routes() {
