@@ -74,6 +74,8 @@ class AppointmentController {
   }
 
   async index(req, res) {
+    const { page = 1 } = req.query;
+
     /**
      * realiza um consulta dos agendamentos realizados pelo usuario logado
      * e que os seviços não foram cancelados
@@ -84,6 +86,10 @@ class AppointmentController {
       where: { user_id: req.userId, canceled_at: null },
       order: ['date'],
       attributes: ['id', 'date'],
+      // limite de registros por pagina
+      limit: 20,
+      // quantos registros serão pulados para compor a proxima pagina
+      offset: (page - 1) * 20,
 
       /**
        * realiza a inclusão do model User apelidado por provider
