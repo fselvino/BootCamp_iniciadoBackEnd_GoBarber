@@ -31,6 +31,17 @@ class AppointmentController {
         .status(401)
         .json({ error: 'You can only create appointments with providers' });
     }
+
+    /**
+     * Realiza teste para verificar se o usuario é provedor
+     * se for retorna erro o funcionario nao pode agendar um serviço com ele mesmo
+     */
+    if (req.userId == provider_id) {
+      return res
+        .status(401)
+        .json({ error: 'supplier cannot schedule service to' });
+    }
+
     /**
      * parseISO transforma a string date em um objeto javascript e
      * esse objeto sera utilizado dentro de strartOfHour
