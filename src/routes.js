@@ -26,5 +26,6 @@ routes.get('/appointments', appointmentController.index);
 
 routes.get('/schedule', scheduleController.index);
 routes.get('/notifications', notificatiosController.index);
+routes.put('/notifications/:id', notificatiosController.update);
 
 export default routes;

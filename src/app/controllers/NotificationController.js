@@ -20,6 +20,17 @@ class NotificationController {
 
     return res.json(notifications);
   }
+
+  async update(req, res) {
+    // metodo consulta pelo id da notificaçao e atualiza o campo read com true
+    // informando que a mensagem foi lida
+    const notification = await Notification.findByIdAndUpdate(
+      req.params.id,
+      { read: true },
+      { new: true }
+    );
+    return res.json(notification);
+  }
 }
 
 export default new NotificationController();

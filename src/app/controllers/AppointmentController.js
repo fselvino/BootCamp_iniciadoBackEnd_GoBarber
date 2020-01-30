@@ -36,7 +36,7 @@ class AppointmentController {
      * Realiza teste para verificar se o usuario é provedor
      * se for retorna erro o funcionario nao pode agendar um serviço com ele mesmo
      */
-    if (req.userId == provider_id) {
+    if (req.userId === provider_id) {
       return res
         .status(401)
         .json({ error: 'supplier cannot schedule service to' });
