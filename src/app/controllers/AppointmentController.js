@@ -1,6 +1,8 @@
 import * as yup from 'yup';
-import { startOfHour, parseISO, isBefore } from 'date-fns';
+import { startOfHour, parseISO, isBefore, format } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 import Appointment from '../models/Appointment';
+import Notification from '../schemas/Notification';
 import User from '../models/User';
 import File from '../models/File';
 
@@ -63,13 +65,33 @@ class AppointmentController {
         .json({ error: 'Appointment date is not available' });
     }
     /**
-     * persiste os dados na tabela appointment
+     * persiste os dados na tabela appointment - ou seja cria um agendamento
      */
     const appointment = await Appointment.create({
       user_id: req.userId,
       provider_id,
       date: hourStart,
     });
+
+    /**
+     * Notify appointment provider
+     * Notifica o prestador de serviço
+     */
+
+    // retorna os dados do usuario logado
+    const user = await User.findByPk(req.userId);
+
+    // formata o estilo da data que sera pesistida no mongo com locale pt
+    const formatteDate = format(hourStart, "dd 'de' MMMM', às' H:mm'h'", {
+      locale: pt,
+    });
+
+    // cria a notificaçao no banco mongodb
+    await Notification.create({
+      content: `Novo agendamento de ${user.name} para dia ${formatteDate} `,
+      user: provider_id,
+    });
+    console.log(hourStart);
     return res.json(appointment);
   }
 
