@@ -6,7 +6,8 @@ import Notification from '../schemas/Notification';
 import User from '../models/User';
 import File from '../models/File';
 
-import Mail from '../../lib/Mail';
+import CancellationMail from '../jobs/CancellationMail';
+import Queue from '../../lib/Queue';
 
 class AppointmentController {
   async store(req, res) {
@@ -160,11 +161,14 @@ class AppointmentController {
     const appointment = await Appointment.findByPk(req.params.id, {
       // inclue a tablela user com o relacionamento provider
       // retornando somente o nome e email
-      include: {
-        model: User,
-        as: 'provider',
-        attributes: ['name', 'email'],
-      },
+      include: [
+        {
+          model: User,
+          as: 'provider',
+          attributes: ['name', 'email'],
+        },
+        { model: User, as: 'user', attributes: ['name'] },
+      ],
     });
 
     /**
@@ -175,6 +179,12 @@ class AppointmentController {
     if (appointment.user_id !== req.userId) {
       return res.status(401).json({
         error: "You don't have permission to cancel this appointment.",
+      });
+    }
+
+    if (appointment.canceled_at !== null) {
+      return res.status(401).json({
+        error: 'The appointment has been canceled',
       });
     }
 
@@ -193,14 +203,7 @@ class AppointmentController {
     // salva no banco
     await appointment.save();
 
-    /**
-     *Envia o email para o provider informando que houve um cancelamento e quem realizou
-     */
-    await Mail.sendMail({
-      to: `${appointment.provider.name} <${appointment.provider.email}>`,
-      subject: 'Agendamento Cancelado',
-      text: 'Voce tem um novo cancelamento',
-    });
+    await Queue.add(CancellationMail.key, { appointment });
 
     return res.json(appointment);
   }
