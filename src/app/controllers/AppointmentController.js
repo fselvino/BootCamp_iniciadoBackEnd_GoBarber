@@ -1,10 +1,12 @@
 import * as yup from 'yup';
-import { startOfHour, parseISO, isBefore, format } from 'date-fns';
+import { startOfHour, parseISO, isBefore, format, subHours } from 'date-fns';
 import pt from 'date-fns/locale/pt';
 import Appointment from '../models/Appointment';
 import Notification from '../schemas/Notification';
 import User from '../models/User';
 import File from '../models/File';
+
+import Mail from '../../lib/Mail';
 
 class AppointmentController {
   async store(req, res) {
@@ -102,7 +104,8 @@ class AppointmentController {
       content: `Novo agendamento de ${user.name} para dia ${formatteDate} `,
       user: provider_id,
     });
-    console.log(hourStart);
+
+    // console.log(hourStart);
     return res.json(appointment);
   }
 
@@ -150,6 +153,56 @@ class AppointmentController {
       ],
     });
     return res.json(appointments);
+  }
+
+  async delete(req, res) {
+    // busca os dados do agendamento no banco
+    const appointment = await Appointment.findByPk(req.params.id, {
+      // inclue a tablela user com o relacionamento provider
+      // retornando somente o nome e email
+      include: {
+        model: User,
+        as: 'provider',
+        attributes: ['name', 'email'],
+      },
+    });
+
+    /**
+     * verifica se o Id do usuario que realizou o agendamento e o mesmo
+     * que o Id do usuario logado, caso contrario retorna erro informando
+     * que não tem permissa de cancelamento
+     */
+    if (appointment.user_id !== req.userId) {
+      return res.status(401).json({
+        error: "You don't have permission to cancel this appointment.",
+      });
+    }
+
+    // realiza a diminuiçao de duas horas utilizando o metodo subHours
+    const dateWithSub = subHours(appointment.date, 2);
+    /**
+     * Verifica se o agendamento que se quer cancelar esta com antencedencia de duas horas
+     */
+    if (isBefore(dateWithSub, new Date())) {
+      return res.status(401).json({
+        error: 'You can only cancel appointments 2 hours in advance.',
+      });
+    }
+    // correndo tudo bem seto canceled_at com a data atual
+    appointment.canceled_at = new Date();
+    // salva no banco
+    await appointment.save();
+
+    /**
+     *Envia o email para o provider informando que houve um cancelamento e quem realizou
+     */
+    await Mail.sendMail({
+      to: `${appointment.provider.name} <${appointment.provider.email}>`,
+      subject: 'Agendamento Cancelado',
+      text: 'Voce tem um novo cancelamento',
+    });
+
+    return res.json(appointment);
   }
 }
 export default new AppointmentController();
