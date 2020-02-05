@@ -5,6 +5,7 @@ import userController from './app/controllers/UserController';
 import sessionController from './app/controllers/SessionController';
 import fileController from './app/controllers/FileController';
 import providerController from './app/controllers/ProviderController';
+import availableController from './app/controllers/AvailableControler';
 import appointmentController from './app/controllers/AppointmentController';
 import scheduleController from './app/controllers/ScheduleController';
 import notificatiosController from './app/controllers/NotificationController';
@@ -20,12 +21,16 @@ routes.post('/sessions', sessionController.store);
 routes.use(authMiddleware);
 routes.put('/users', userController.update);
 routes.post('/files', upload.single('file'), fileController.store);
+
 routes.get('/providers', providerController.index);
+routes.get('/providers/:providerId/available', availableController.index);
+
 routes.post('/appointments', appointmentController.store);
 routes.get('/appointments', appointmentController.index);
 routes.delete('/appointments/:id', appointmentController.delete);
 
 routes.get('/schedule', scheduleController.index);
+
 routes.get('/notifications', notificatiosController.index);
 routes.put('/notifications/:id', notificatiosController.update);
 
