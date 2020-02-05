@@ -11,7 +11,7 @@ class File extends Model {
           type: Sequelize.VIRTUAL,
           // meto get retorno o caminho da imagem no servidor
           get() {
-            return `http://localhost:3333/files/${this.path}`;
+            return `${process.env.APP_URL}/files/${this.path}`;
           },
         },
       },
