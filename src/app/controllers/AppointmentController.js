@@ -122,7 +122,7 @@ class AppointmentController {
     const appointments = await Appointment.findAll({
       where: { user_id: req.userId, canceled_at: null },
       order: ['date'],
-      attributes: ['id', 'date'],
+      attributes: ['id', 'date', 'past', 'cancelable'],
       // limite de registros por pagina
       limit: 20,
       // quantos registros serão pulados para compor a proxima pagina
